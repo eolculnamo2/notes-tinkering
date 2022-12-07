@@ -1,3 +1,5 @@
+@module("axios") @val external axiosGet: string => Promise.t<'a> = "get"
+
 %%raw("import './App.css'")
 
 type viewMode = Add | View
@@ -11,9 +13,8 @@ type note = {
   last_modified: int,
 }
 
-
 type state = {
-  notes: array<note>,
+  notes: array<ViewMode.note_list_item>,
   username: string,
   view_mode: viewMode,
 }
@@ -24,7 +25,8 @@ let init_state = {
   view_mode: View,
 }
 
-type actions = EnterAddMode | ExitAddMode | UsernameUpdated(string)
+type actions =
+  EnterAddMode | ExitAddMode | UsernameUpdated(string) | NotesLoaded(array<ViewMode.note_list_item>)
 
 let reducer = (state, action) => {
   switch action {
@@ -34,7 +36,12 @@ let reducer = (state, action) => {
     }
   | ExitAddMode => {...state, view_mode: View}
   | UsernameUpdated(username) => {...state, username}
+  | NotesLoaded(items) => {...state, notes: items}
   }
+}
+
+let load_list = (username: string) => {
+  axiosGet(ApiConstants.be_url ++ "/users/" ++ username ++ "/notes")
 }
 
 @react.component @genType
@@ -46,10 +53,18 @@ let make = () => {
       style={ReactDOM.Style.make(~display="block", ~margin="auto", ())}
       value={state.username}
       onChange={e => ReactEvent.Form.currentTarget(e)["value"]->UsernameUpdated->dispatch}
+      onBlur={_ => {
+        if state.username->Js.String2.length > 0 {
+          let _ = load_list(state.username)->Promise.then(data => {
+            data["data"]->NotesLoaded->dispatch
+            Promise.resolve()
+          })
+        }
+      }}
     />
     <button onClick={_ => dispatch(EnterAddMode)}> {"Add note"->React.string} </button>
     {switch state.view_mode {
-    | View => <ViewMode />
+    | View => <ViewMode notes=state.notes />
     | Add => <AddMode username=state.username on_exit={() => dispatch(ExitAddMode)} />
     }}
   </div>

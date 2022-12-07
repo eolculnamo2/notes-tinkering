@@ -1,10 +1,21 @@
-@module("axios") @val external axiosGet: string => Promise.t<'a> = "get"
-
-let load_list = () => {
-
+type note_list_item = {
+  id: string,
+  title: string,
+  category: string,
 }
 
 @react.component
-let make = () =>  {
-  <div>{"VIEW"->React.string}</div>
+let make = (~notes: array<note_list_item>) => {
+  <div>
+    {notes
+    ->Belt.Array.map(note => {
+      <div key=note.id>
+        <div>
+          <strong> {note.title->React.string} </strong>
+        </div>
+        <div> {note.category->React.string} </div>
+      </div>
+    })
+    ->React.array}
+  </div>
 }
