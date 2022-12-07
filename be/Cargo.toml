@@ -1,0 +1,25 @@
+[package]
+name = "rust-be-starter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bcrypt = "0.13.0"
+# postgres = "0.19.4"
+tokio-postgres = "0.7.7"
+tokio = "1.21.2"
+tokio-pg-mapper = "0.2.0"
+tokio-pg-mapper-derive = "0.2.0"
+chrono = { version = "0.4.23", features = ["clock"] }
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies.rocket]
+version = "0.5.0-rc.2"
+features = ["json"]
+
+[dependencies.uuid]
+version = "1.2.2"
+features = [
+    "v4",
+]
